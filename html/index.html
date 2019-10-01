@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"/>
+        <title>Temperature Pool</title>
+    </head>
+    <body>
+        <table id="temperatureTable" class="table bordered">
+            <th class="leftAlignCell" colspan="2">Temperatures</th>
+            <tr>
+                <td class="leftAlignCell">Power Unit</td>
+                <td id="pu_temp" class="rightAlignCell"></td>
+            </tr>
+            <tr>
+                <td class="leftAlignCell">Modem</td>
+                <td id="m_temp" class="rightAlignCell"></td>
+            </tr>
+            <tr>
+                <td class="leftAlignCell">Cross Board</td>
+                <td id="cb_temp" class="rightAlignCell"></td>
+            </tr>
+            <tr>
+                <td class="leftAlignCell">Upconverter</td>
+                <td id="uc_temp" class="rightAlignCell"></td>
+            </tr>
+        </table>
+
+        <script>
+            var indexTimerId;
+
+            function outputTemperature(t) {
+                return (t !== "") ? t + " &deg;C" : "no connection";
+            }
+
+            function indexTimerCallback() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "index?_=" + new Date().getTime());
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        let dataJ = JSON.parse(xhr.responseText);
+                        document.getElementById("pu_temp").innerHTML = outputTemperature(dataJ["pu"]);
+                        document.getElementById("m_temp").innerHTML = outputTemperature(dataJ["m"]);
+                        document.getElementById("cb_temp").innerHTML = outputTemperature(dataJ["cb"]);
+                        document.getElementById("uc_temp").innerHTML = outputTemperature(dataJ["uc"]);
+                    }
+                    else {
+                        console.log("temp_table: Request failed (" + xhr.status + ")");
+                    }
+                };
+
+                xhr.send();
+                indexTimerId = setTimeout(indexTimerCallback, 1000);
+            }
+
+            document.addEventListener("DOMContentLoaded", function(event) {
+                indexTimerId = setTimeout(indexTimerCallback);
+            });
+        </script>
+    </body>
+</html>
